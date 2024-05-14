@@ -6,10 +6,12 @@ import {
   Post,
   UnauthorizedException,
   InternalServerErrorException,
+  Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInDto } from './dto/signIn-auth.dto';
 import { JwtService } from '@nestjs/jwt';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -20,7 +22,7 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async login(@Body() signInDto: SignInDto) {
+  async login(@Body() signInDto: SignInDto, @Res() res: Response) {
     try {
       const { username, password } = signInDto;
 
@@ -32,16 +34,18 @@ export class AuthController {
       const payload = { sub: user.id, username: user.username };
       const access_token = await this.jwtService.signAsync(payload);
 
+      const COOKIE_OPTIONS = {
+        httpOnly: true,
+        secure: true,
+        maxAge: 3600000, // 1 hour
+      };
+
+      res.cookie('access_token', access_token, COOKIE_OPTIONS);
+
       const userInfo = { userId: user.id, username: user.username };
-      return { access_token, userInfo };
+      return res.json({ access_token, userInfo });
     } catch (error) {
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      } else {
-        throw new InternalServerErrorException(
-          'An error occurred during login',
-        );
-      }
+      throw new InternalServerErrorException('An error occurred during login');
     }
   }
 }
