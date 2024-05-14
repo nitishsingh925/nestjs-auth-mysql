@@ -48,4 +48,18 @@ export class AuthController {
       throw new InternalServerErrorException('An error occurred during login');
     }
   }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('logout')
+  async logout(@Res() response: Response) {
+    const COOKIE_OPTIONS = {
+      httpOnly: true,
+      secure: true,
+      maxAge: 0, // Immediately expire the cookie
+    };
+
+    response.clearCookie('access_token', COOKIE_OPTIONS);
+
+    return response.json({ message: 'Logout successful' });
+  }
 }
