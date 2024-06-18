@@ -6,7 +6,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
   if (process.env.APP_PORT === undefined) {
-    throw new Error('APP_PORT environment variable is not defined');
+    throw new Error(
+      'APP_PORT environment variable is not defined set in .env file ',
+    );
   }
   await app.listen(process.env.APP_PORT);
 }
