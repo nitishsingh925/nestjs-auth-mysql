@@ -12,7 +12,10 @@ import { AuthService } from './auth.service';
 import { SignInDto } from './dto/signIn-auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
-
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { LoginResponseDto } from './dto/login-response.dto';
+import { LogoutResponseDto } from './dto/logout-response.dto';
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -20,6 +23,12 @@ export class AuthController {
     private jwtService: JwtService,
   ) {}
 
+  @ApiOperation({ summary: 'Login user' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Successful login',
+    type: LoginResponseDto,
+  })
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(@Body() signInDto: SignInDto, @Res() res: Response) {
@@ -49,6 +58,12 @@ export class AuthController {
     }
   }
 
+  @ApiOperation({ summary: 'Logout user' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Logout successful',
+    type: LogoutResponseDto,
+  })
   @HttpCode(HttpStatus.OK)
   @Post('logout')
   async logout(@Res() response: Response) {

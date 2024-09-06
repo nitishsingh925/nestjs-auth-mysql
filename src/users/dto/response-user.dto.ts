@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateUserDto {
+export class UserResponseDto {
   @ApiProperty({
     description: 'The username of the user',
     example: 'nitish',
@@ -20,8 +20,14 @@ export class CreateUserDto {
   name: string;
 
   @ApiProperty({
-    description: 'The password of the user',
-    example: 'strong@Password123',
+    description: 'The hashed password of the user',
+    example: '$2b$10$S/wXZaoLJStvVudBeT3/JeQMReSL1x0iTLg52Nwu7l7tq8.wUrHwK',
   })
   password: string;
+
+  @ApiProperty({
+    description: 'The unique identifier of the user',
+    example: 1,
+  })
+  id: number;
 }
