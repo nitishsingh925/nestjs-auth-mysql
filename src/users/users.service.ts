@@ -28,4 +28,8 @@ export class UsersService {
     const options: FindOneOptions<User> = { where: { username } };
     return this.userRepository.findOne(options);
   }
+  async findOneById(userId: number): Promise<User | undefined> {
+    const options: FindOneOptions<User> = { where: { id: userId } };
+    return this.userRepository.findOne(options);
+  }
 }

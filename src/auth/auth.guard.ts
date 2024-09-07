@@ -9,21 +9,38 @@ import { Request } from 'express';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+  constructor(private readonly jwtService: JwtService) {}
 
-  canActivate(context: ExecutionContext): boolean | Promise<boolean> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
-    const token = request.cookies?.access_token;
+    const token = this.getTokenFromRequest(request);
 
     if (!token) {
       throw new UnauthorizedException('No token provided');
     }
+
     try {
-      const payload = this.jwtService.verify(token);
-      request['user'] = payload; // Attach user payload to the request object
+      const payload = await this.jwtService.verifyAsync(token);
+      request['user'] = payload; // Attach user payload to request
       return true;
-    } catch (err) {
+    } catch (error) {
       throw new UnauthorizedException('Invalid token');
     }
+  }
+
+  private getTokenFromRequest(request: Request): string | undefined {
+    // Check token from cookie or Authorization header
+    const cookieToken = request.cookies?.access_token;
+    const headerToken = this.extractTokenFromHeader(request);
+    // Return the first non-null token
+    return cookieToken || headerToken;
+  }
+
+  private extractTokenFromHeader(request: Request): string | undefined {
+    const authHeader = request.headers.authorization;
+    if (!authHeader) return undefined;
+
+    const [type, token] = authHeader.split(' ');
+    return type === 'Bearer' ? token : undefined;
   }
 }
