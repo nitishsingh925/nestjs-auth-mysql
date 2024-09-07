@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository, FindOneOptions } from 'typeorm';
@@ -12,6 +12,20 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
+    // Check if a user with the same username or email already exists
+    const existingUserByUsername = await this.findOneByUsername(
+      createUserDto.username,
+    );
+    const existingUserByEmail = await this.findOneByEmail(createUserDto.email);
+
+    if (existingUserByUsername) {
+      throw new ConflictException('Username already exists');
+    }
+
+    if (existingUserByEmail) {
+      throw new ConflictException('Email already exists');
+    }
+
     const saltOrRounds = 10;
     const hashPassword = await bcrypt.hash(
       createUserDto.password,
@@ -28,6 +42,12 @@ export class UsersService {
     const options: FindOneOptions<User> = { where: { username } };
     return this.userRepository.findOne(options);
   }
+
+  async findOneByEmail(email: string): Promise<User | undefined> {
+    const options: FindOneOptions<User> = { where: { email } };
+    return this.userRepository.findOne(options);
+  }
+
   async findOneById(userId: number): Promise<User | undefined> {
     const options: FindOneOptions<User> = { where: { id: userId } };
     return this.userRepository.findOne(options);
