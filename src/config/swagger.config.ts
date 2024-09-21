@@ -11,7 +11,7 @@ export function setupSwagger(app: INestApplication): void {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
-        name: 'AbhiOrder',
+        name: 'Nestjs-auth-mysql',
         description: 'Enter JWT Token (accessToken)',
       },
       'accessToken',
